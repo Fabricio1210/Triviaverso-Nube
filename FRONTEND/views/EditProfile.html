@@ -1,0 +1,155 @@
+<html lang="en">
+    <head>
+        <title>Edit Profile</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+
+        <!-- Bootstrap CSS v5.2.1 -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+        />
+        <link href="./../styles/Nav&side.css" rel="stylesheet">
+        <link href="./../styles/EditProfile.css" rel="stylesheet">
+    </head>
+
+    <body>
+        <header>
+            <nav class="navbar navbar-expand-sm sticky-top">
+                <div class="container-fluid d-flex justify-content-between align-items-center">
+                    <i class="bi bi-list" id="menu"></i>
+                    <img src="./../assets/logo.jpeg" class="logo">  <div></div>
+                </div>
+            </nav>
+            <div class="d-flex">
+                <div id="sidebar" class=" text-white position-fixed">
+                    <ul class="nav nav-pills flex-column pt-3 flex-grow-1">
+                        <li class="nav-item">
+                            <a href="Home.html" class="nav-link text-white">
+                                <i class="bi bi-house"></i>
+                                <span class="link-text ms-2">Inicio</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="Profile.html" class="nav-link text-white" id="a-profile">
+                                <i class="bi bi-person" id="i-profile"></i>
+                                <span class="link-text ms-2">Perfil</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="Multiplayer.html" class="nav-link text-white">
+                                <i class="bi bi-joystick"></i>
+                                <span class="link-text ms-2">Juegos</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="leaderboard.html" class="nav-link text-white" id="a-leaderboard">
+                                <i class="bi bi-flag"></i>
+                                <span class="link-text ms-2">Marcador</span>
+                            </a>
+                        </li>
+                        <li class="nav-item mt-auto" id="li-salir" style="display: block;">
+                            <a href="" class="nav-link text-white" id="btnSalir">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span class="link-text ms-2">Salir</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="Edit content">
+                    <div id="banner" class="border-bottom border-3 border-dark">
+                        <img src="./../assets/logo.jpeg" alt="profile_img" class="profile_pic">
+                    </div>
+                    <form action="" class="container datos" id="FormEdit">
+                        <div class="row g-4">
+                          <div class="col-12 col-sm-6">
+                            <label for="txtName" class="form-label">Nombre:</label>
+                            <input type="text" name="name" id="txtName" class="form-control" placeholder="Nuevo Nombre" required>
+                          </div>
+                      
+                          <div class="col-12 col-sm-6">
+                            <label for="cbcategoria" class="form-label">Categoría favorita:</label>
+                            <select class="form-select" id="cbcategoria" name="favourite_category">
+                                <!-- <select class="form-select" id="cbcategoria" name="categoria" required> -->
+                              <option selected disabled>Elige una categoría</option>
+                                <option value="Star Wars">✨ Star Wars</option>
+                                <option value="Marvel">🦸 Marvel</option>
+                                <option value="Dragon Ball">🔮 Dragon Ball</option>
+                                <option value="Naruto">🥷 Naruto</option>
+                                <option value="One Piece">🏴‍☠️ One Piece</option>
+                                <option value="Death Note">📓 Death Note</option>
+                                <option value="Pokemon">⚡ Pokémon</option>
+                                <option value="Inazuma Eleven">⚽ Inazuma Eleven</option>
+                                <option value="LeagueOfLegends">🛡️ League of Legends</option>
+                                <option value="Zelda">🗡️ Zelda</option>
+                                <option value="Minecraft">⛏️ Minecraft</option>
+                                <option value="Mario">🍄 Mario</option>
+                                <option value="Halo">👽 Halo</option>
+                                <option value="GearsOfWar">🔫 Gears of War</option>
+                                <option value="Bob Esponja">🍍 Bob Esponja</option>
+                            </select>
+                          </div>
+                          
+                          <div class="col-12">
+                            <label for="txtmsg" class="form-label">Mensaje:</label>
+                            <input type="text" id="txtmsg" class="form-control" placeholder="Hola!" name="message">
+                            <!-- <input type="text" name="msg" id="txtmsg" class="form-control" placeholder="Hola!" required> -->
+                          </div>
+
+                          <div class="col-12 col-sm-6">
+                            <label for="txtpass" class="form-label">Contraseña:</label>
+                            <input type="password" name="password" id="txtpass" class="form-control" required>
+                          </div>
+
+                          <div class="col-12 col-sm-6">
+                            <label for="txtConfpass" class="form-label">Confirmar contraseña:</label>
+                            <input type="password" name="confirm_password" id="txtConfpass" class="form-control" required>
+                          </div>
+                          
+                          <div class="col-12 d-flex justify-content-center align-items-end gap-5 mt-4 mb-2">
+                            <button type="submit" class="btn btn-pers">Editar</button>
+                            <a href="Profile.html" class="btn btn-pers">Cancelar</a>
+                          </div>
+                        </div>
+                      </form>
+                      
+                </div>
+
+            </div>
+        </header>
+        <main>
+            <script>
+                document.getElementById('menu').addEventListener('click', ()=>{
+                    const sidebar = document.getElementById('sidebar');
+                    sidebar.classList.toggle('expanded');
+                });
+            </script>
+        </main>
+        <footer>
+            <!-- place footer here -->
+        </footer>
+        <!-- Bootstrap JavaScript Libraries -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+            integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+            crossorigin="anonymous"
+        ></script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+            integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+            crossorigin="anonymous"
+        ></script>
+        <script src="../controllers/env.js"></script>
+        <script src="../controllers/Users_controller.js"></script>
+    </body>
+</html>

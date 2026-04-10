@@ -1,0 +1,183 @@
+<html lang="en">
+    <head>
+        <title>Triviaverso - Question</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+
+        <!-- Bootstrap CSS v5.2.1 -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
+              rel="stylesheet"
+              integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT"
+              crossorigin="anonymous">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+        <link href="./../styles/Nav&side.css" rel="stylesheet">
+        <link href="./../styles/Pregunta.css" rel="stylesheet">
+    </head>
+
+    <body>
+        <header>
+            <nav class="navbar navbar-expand-sm sticky-top">
+                <div class="container-fluid d-flex justify-content-between align-items-center">
+                    <i class="bi bi-list" id="menu"></i>
+                    <img src="./../assets/logo.jpeg" class="logo"><div></div>
+                </div>
+            </nav>
+        </header>
+        <main>
+            <div id="contenedor_carga">
+                <div id="carga"></div>
+        </div>
+            <div id="sidebar" class=" text-white position-fixed">
+                <ul class="nav nav-pills flex-column pt-3 flex-grow-1">
+                    <li class="nav-item">
+                        <a href="Home.html" class="nav-link text-white">
+                            <i class="bi bi-house"></i>
+                            <span class="link-text ms-2">Inicio</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="Profile.html" class="nav-link text-white" id="a-profile">
+                            <i class="bi bi-person" id="i-profile"></i>
+                            <span class="link-text ms-2">Perfil</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="Multiplayer.html" class="nav-link text-white">
+                            <i class="bi bi-joystick"></i>
+                            <span class="link-text ms-2">Juegos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="leaderboard.html" class="nav-link text-white" id="a-leaderboard">
+                            <i class="bi bi-flag"></i>
+                            <span class="link-text ms-2">Marcador</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mt-auto" id="li-salir" style="display: block;">
+                        <a href="" class="nav-link text-white" id="btnSalir">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span class="link-text ms-2">Salir</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="space">
+                <div class="pt-3">
+                    <div class="container">
+                        <div class="timer" id="Timer">
+                            <span class="me-2" id="timer-text"><b id="txtseg">20</b> Seg.</span>
+                            <i class="bi bi-alarm fs-2"></i>
+                        </div>
+                        <div class="barra" id="barra">
+                            <span class="progreso" id="progress"></span>
+                    </div>
+                    </div>
+                </div>
+                <div class="container mt-3">
+                    <div class="row row-cols-1 g-4">
+                        <div class="col">
+                            <div class="card text-bg-dark h-100">
+                                <div class="card-body py-md-3 py-lg-5 px-4">
+                                    <h5 class="card-title">Peliculas</h5>
+                                    <p class="card-text">
+                                        En las peliculas de star wars, ¿Con que otro nombre se le conoce a Darth Sidious?
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="space">
+                <div class="container mt-4">
+                    <div class="row row-cols-1 row-cols-sm-2 g-4">
+                        <div class="col">
+                            <a id="opcion1" class="btn btn-danger btn-lg d-block h-100 text-center py-4 py-sm-5">
+                                <span class="d-flex align-items-center justify-content-center h-100">
+                                    RESPUESTA 1
+                                </span>
+                            </a>
+                        </div>
+
+                        <div class="col">
+                            <a id="opcion2" class="btn btn-primary btn-lg d-block h-100 text-center py-4 py-sm-5">
+                                <span class="d-flex align-items-center justify-content-center h-100">
+                                    RESPUESTA 2
+                                </span>
+                            </a>
+                        </div>
+                        <div class="col">
+                            <a id="opcion3" class="btn btn-success btn-lg d-block h-100 text-center py-4 py-sm-5">
+                                <span class="d-flex align-items-center justify-content-center h-100">
+                                    RESPUESTA 3
+                                </span>
+                            </a>
+                        </div>
+
+                        <div class="col">
+                            <a id="opcion4" class="btn btn-warning btn-lg d-block h-100 text-center py-4 py-sm-5">
+                                <span class="d-flex align-items-center justify-content-center h-100">
+                                    RESPUESTA 4
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <br>
+            </div>
+            <script>
+                document.getElementById('menu').addEventListener('click', ()=>{
+                    const sidebar = document.getElementById('sidebar');
+                    sidebar.classList.toggle('expanded');
+                });
+            </script>
+        </main>
+        <footer>
+            <!-- place footer here -->
+        </footer>
+        <!-- Bootstrap JavaScript Libraries -->
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+                integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+                crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.min.js"
+                integrity="sha384-RuyvpeZCxMJCqVUGFI0Do1mQrods/hhxYlcVfGPOfQtPJh0JCw12tUAZ/Mv10S7D"
+                crossorigin="anonymous"></script>
+                <div class="modal fade" id="resultadoModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content text-white bg-dark">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="resultadoModalLabel">Resultado</h5>
+                        </div>
+                        <div class="modal-body text-center">
+                            <h3 id="textoResultado"></h3>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-light" id="AceptarRuleta" >Continuar</button>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="finalScoreModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content text-white bg-dark">
+                    <div class="modal-header">
+                        <h5 class="modal-title">¡Juego terminado!</h5>
+                    </div>
+                    <div class="modal-body text-center">
+                        <h3 id="textoScoreFinal"></h3>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-light" id="btnBackHome">Volver al inicio</button>
+                    </div>
+                    </div>
+                </div>
+</div>
+    </body>
+    <script src="../controllers/env.js"></script>
+    <script src="../controllers/question.js"></script>
+    <script src="./../controllers/Timer_controller.js"></script>
+</html>
