@@ -1,14 +1,22 @@
-
 services:
   trivia-api:
-    build: ./BACKEND
+    # Se recomienda usar la variable para que sea dinamico
+    image: ${AWS_ACCOUNT_ID_1}.dkr.ecr.${AWS_REGION}.amazonaws.com/trivia-backend:latest
     container_name: backend-trivia
     ports:
       - "3000:3000"
+    environment:
+      - AWS_ACCESS_KEY_ID_1=${AWS_ACCESS_KEY_ID_1}
+      - AWS_SECRET_ACCESS_KEY_1=${AWS_SECRET_ACCESS_KEY_1}
+      - AWS_SESSION_TOKEN_1=${AWS_SESSION_TOKEN_1}
+      - SNS_TOPIC_ARN=${SNS_TOPIC_ARN}
+      - AWS_REGION=${AWS_REGION}
+      - MONGO_URI=${MONGO_URI}
     restart: always
 
   trivia-web:
-    build: ./FRONTEND
+    # Lo mismo para el frontend
+    image: ${AWS_ACCOUNT_ID_1}.dkr.ecr.${AWS_REGION}.amazonaws.com/trivia-frontend:latest
     container_name: frontend-trivia
     ports:
       - "8080:80"

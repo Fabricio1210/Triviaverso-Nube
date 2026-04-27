@@ -3,6 +3,7 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.1037.0",
     "chalk": "^4.1.2",
     "cors": "^2.8.6",
     "express": "^5.1.0",

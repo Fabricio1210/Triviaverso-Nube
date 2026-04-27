@@ -6,31 +6,28 @@ const cors = require('cors');
 const routerApi = require('./routes/api.js');
 const dye = chalk;
 
-//-----------CREDENCIALES-----------//
-const mongoConnection = "mongodb+srv://diegogomezm:1QoAVlGjucuDovJ4@triviaverso.jvgmq0l.mongodb.net/Triviaverso";
-
-//-----------CONFIGURACIÓN DE DEPENDENCIAS-----------//
+//-----------CONFIGURACION-----------//
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+
+
 const db = mongoose.connection;
 db.on(`connecting`, () => {
-    console.log(dye.yellow(`Conectando...`));
+    console.log(dye.yellow(`Conectando a base de datos...`));
 });
+
 db.on(`connected`, () => {
-    console.log(dye.greenBright(`¡Conectado exitosamente!`));
+    console.log(dye.greenBright(`Conexion exitosa a MongoDB!`));
     app.listen(port, () => {
         console.log(dye.underline.blackBright(`Proyecto corriendo en el puerto ${port}!`));
     });
 });
-dye.level = 2;
+
 
 //-----------MIDDLEWARE-----------//
 app.use(cors());
 app.use(express.json());
 app.use(routerApi);
 
-//-----------CONEXIÓN-----------//
+//-----------CONEXION-----------//
 mongoose.connect(mongoConnection);
-
-
-
