@@ -2,8 +2,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const chalk = require('chalk');
+const cors = require('cors');
 const routerApi = require('./routes/api.js');
-const dye = chalk.default;
+const dye = chalk;
 
 //-----------CREDENCIALES-----------//
 const mongoConnection = "mongodb+srv://diegogomezm:1QoAVlGjucuDovJ4@triviaverso.jvgmq0l.mongodb.net/Triviaverso";
@@ -24,7 +25,7 @@ db.on(`connected`, () => {
 dye.level = 2;
 
 //-----------MIDDLEWARE-----------//
-app.use(express.static('../FRONTEND'));
+app.use(cors());
 app.use(express.json());
 app.use(routerApi);
 

@@ -1,6 +1,10 @@
 {
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
-    "chalk": "^5.4.1",
+    "chalk": "^4.1.2",
+    "cors": "^2.8.6",
     "express": "^5.1.0",
     "mongoose": "^8.14.1",
     "nodemon": "^3.1.10",

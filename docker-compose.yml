@@ -1,0 +1,17 @@
+
+services:
+  trivia-api:
+    build: ./BACKEND
+    container_name: backend-trivia
+    ports:
+      - "3000:3000"
+    restart: always
+
+  trivia-web:
+    build: ./FRONTEND
+    container_name: frontend-trivia
+    ports:
+      - "8080:80"
+    depends_on:
+      - trivia-api
+    restart: always
