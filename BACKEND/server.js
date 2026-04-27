@@ -1,33 +1,33 @@
 //-----------IMPORTACIONES-----------//
 const express = require('express');
-const mongoose = require('mongoose');
-const chalk = require('chalk');
 const cors = require('cors');
 const routerApi = require('./routes/api.js');
-const dye = chalk;
+const { sequelize } = require('./models');
+const path = require('path');
 
 //-----------CONFIGURACION-----------//
 const app = express();
 const port = process.env.PORT || 3000;
 
-
-const db = mongoose.connection;
-db.on(`connecting`, () => {
-    console.log(dye.yellow(`Conectando a base de datos...`));
-});
-
-db.on(`connected`, () => {
-    console.log(dye.greenBright(`Conexion exitosa a MongoDB!`));
-    app.listen(port, () => {
-        console.log(dye.underline.blackBright(`Proyecto corriendo en el puerto ${port}!`));
-    });
-});
-
-
 //-----------MIDDLEWARE-----------//
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '../FRONTEND')));
 app.use(routerApi);
 
 //-----------CONEXION-----------//
-mongoose.connect(mongoConnection);
+sequelize.authenticate()
+    .then(() => {
+        console.log('Conectando a base de datos...');
+        return sequelize.sync({ alter: true });
+    })
+    .then(() => {
+        console.log('Conexion exitosa a RDS!');
+        app.listen(port, () => {
+            console.log(`Proyecto corriendo en el puerto ${port}!`);
+        });
+    })
+    .catch((err) => {
+        console.error('Error al conectar a la base de datos:', err.message);
+        process.exit(1);
+    });

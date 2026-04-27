@@ -1,16 +1,18 @@
-//-----------IMPORTACIONES-----------//
 const express = require('express');
-const { getNewQuestion,
-        getQuestionByID,
-        saveNewQuestion} = require('../controllers/questions_api_controller');
+const {
+    getAllQuestions,
+    getQuestionByID,
+    saveNewQuestion,
+    updateQuestion,
+    deleteQuestion
+} = require('../controllers/questions_api_controller');
 
-//-----------CONFIGURACIÓN DE DEPENDENCIAS-----------//
 const routerQuestions = express.Router();
 
-//-----------RUTAS PRINCIPALES-----------//
-routerQuestions.get('/new/:topic', getNewQuestion);
+routerQuestions.get('/', getAllQuestions);
 routerQuestions.get('/byID/:id', getQuestionByID);
 routerQuestions.post('/', saveNewQuestion);
+routerQuestions.put('/:id', updateQuestion);
+routerQuestions.delete('/:id', deleteQuestion);
 
-//-----------EXPORTACIONES-----------//
-module.exports = {routerQuestions};
+module.exports = { routerQuestions };

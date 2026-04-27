@@ -1,31 +1,12 @@
-//-----------IMPORTACIONES-----------//
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../database/connection');
 
-//-----------MODELO-----------//
-let userHistorySchema = mongoose.Schema({
-    questions: {
-        type: [{
-            question: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Question'
-            },
-            correct: {
-                type: Boolean,
-            required: true
-            }
-        }],
-        required: true
-    },
-    user_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    }
-}, {
-        collection: 'user_histories'
-    }
-    );
-let UserHistory = mongoose.model('UserHistory', userHistorySchema);
+const UserHistory = sequelize.define('UserHistory', {
+    id_historial:    { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    id_usuario:      { type: DataTypes.INTEGER, allowNull: false },
+    id_pregunta:     { type: DataTypes.INTEGER, allowNull: false },
+    es_correcta:     { type: DataTypes.BOOLEAN, allowNull: false },
+    fecha_respuesta: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, { tableName: 'UserHistory', timestamps: false });
 
-//-----------EXPORTACIONES-----------//
 module.exports = UserHistory;

@@ -1,81 +1,75 @@
-//-----------IMPORTACIONES-----------//
-const mongoose = require('mongoose');
-const openAI = require("openai")
-const Question = require('../models/question.js');
-const User = require("../models/user");
-const {Mongoose} = require("mongoose");
-const openAIClient = new openAI({apiKey:""});
+const { Question, Category } = require('../models');
 
-//-----------FUNCIONES CRUD-----------//
-function getNewQuestion(req, res) {
-    if(!req.params.topic)
-        return res.status(400).send({"Error": "Topic Not Provided"});
-    openAIClient.responses.create({
-        model: "gpt-4o-mini",
-        input: `Para el tema "${req.params.topic}", genera una pregunta de opción múltiple que no se repita y dificiles en formato JSON. La pregunta debe ser clara y precisa, con 4 opciones de respuesta. Solo una de las opciones debe ser correcta. La salida debe ser únicamente un objeto JSON con las siguientes propiedades:
-                question: una pregunta relacionada con el tema.
-                options: un arreglo de 4 posibles respuestas. 
-                rightAnswerIndex: el índice (0 a 3) de la respuesta correcta dentro del arreglo. 
-                topic: el tema proporcionado. 
-                La salida debe tener el siguiente formato exacto:{
-                  "question": "Escribe aquí la pregunta",
-                  "options": [
-                    "Opción A",
-                    "Opción B",
-                    "Opción C",
-                    "Opción D"
-                  ],
-                  "rightAnswerIndex": índice_de_la_respuesta_correcta,
-                  "topic": "${req.params.topic}"
-                }
-                No proporciones explicaciones, comentarios, encabezados ni ningún texto adicional. Solo devuelve el JSON.`,
-    }).then(response => {
-        //console.log(response.output_text);
-        let newQuestion = JSON.parse(response.output_text);
-        let newQuestionMongoose = Question(newQuestion);
-        newQuestionMongoose.save().then((newDoc) => {
-            res.status(200).send(newDoc);
-        }).catch((err) => {
-            res.status(500).send({"Error": err.message});
-        })
-    }).catch((err) => {
-        res.status(500).send({"Error": err.message});
-    })
-}
-
+// GET /questions/:id
 function getQuestionByID(req, res) {
-    Question.findOne({
-        _id: req.params.id
-    }).then((response) => {
-        if(response)
-            res.status(200).send(response);
+    Question.findByPk(req.params.id, {
+        include: [{ model: Category }]
+    })
+    .then((question) => {
+        if (question)
+            res.status(200).send(question);
         else
-            res.status(404).send({"Error": "Question not found."});
-    }).catch((err) => {res.status(500).send({"Error": err.message})});
-}
-
-function saveNewQuestion(req, res) {
-    let question = req.body.question,
-        options = req.body.options,
-        rightAnswerIndex = req.body.rightAnswerIndex,
-        topic = req.body.topic;
-    if (!question || !options || rightAnswerIndex === undefined || isNaN(rightAnswerIndex) || !topic)
-        res.status(400).send({"Error": "One or more parameters are missing."});
-    else{
-        let newQuestion = {
-            question : question,
-            options : options,
-            rightAnswerIndex : rightAnswerIndex,
-            topic : topic
-        }
-        let newQuestionMongoose = Question(newQuestion, options);
-        newQuestionMongoose.save().then((doc) => {
-            res.status(201).send(doc)
-        }).catch((err) => {
-            res.status(500).send({"Error": err.message});
+            res.status(404).send({ Error: 'Question not found.' });
         })
-    }
+    .catch((err) => res.status(500).send({ Error: err.message }));
 }
 
-//-----------EXPORTACIONES-----------//
-module.exports = {getNewQuestion, getQuestionByID, saveNewQuestion}
+// GET /questions
+function getAllQuestions(req, res) {
+    const where = req.query.id_categoria
+        ? { id_categoria: req.query.id_categoria }
+        : {};
+
+    Question.findAll({ where, include: [{ model: Category }] })
+        .then((questions) => res.status(200).send(questions))
+        .catch((err) => res.status(500).send({ Error: err.message }));
+}
+
+// POST /questions
+function saveNewQuestion(req, res) {
+    const {
+        id_categoria,
+        question,
+        option_0, option_1, option_2, option_3,
+        right_answer_index
+    } = req.body;
+
+    if (!id_categoria || !question || !option_0 || !option_1 ||
+        !option_2 || !option_3 || right_answer_index === undefined)
+    return res.status(400).send({ Error: 'One or more parameters are missing.' });
+
+    Question.create({
+        id_categoria,
+        question,
+        option_0, option_1, option_2, option_3,
+        right_answer_index
+    })
+    .then((newQuestion) => res.status(201).send(newQuestion))
+    .catch((err) => res.status(500).send({ Error: err.message }));
+}
+
+// PUT /questions/:id
+function updateQuestion(req, res) {
+    Question.update(req.body, { where: { id_pregunta: req.params.id } })
+    .then(([rowsUpdated]) => {
+        if (rowsUpdated)
+            res.status(200).send({ message: 'Question updated.' });
+        else
+            res.status(404).send({ Error: 'Question not found.' });
+    })
+    .catch((err) => res.status(500).send({ Error: err.message }));
+}
+
+// DELETE /questions/:id
+function deleteQuestion(req, res) {
+    Question.destroy({ where: { id_pregunta: req.params.id } })
+        .then((rowsDeleted) => {
+        if (rowsDeleted)
+            res.status(200).send({ message: 'Question deleted.' });
+        else
+            res.status(404).send({ Error: 'Question not found.' });
+        })
+        .catch((err) => res.status(500).send({ Error: err.message }));
+}
+
+module.exports = { getQuestionByID, getAllQuestions, saveNewQuestion, updateQuestion, deleteQuestion };

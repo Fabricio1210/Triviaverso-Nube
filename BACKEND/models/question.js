@@ -1,34 +1,15 @@
-//-----------IMPORTACIONES-----------//
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../database/connection');
 
-//-----------MODELO-----------//
-let questionSchema = mongoose.Schema({
-    question: {
-        type: String,
-        required: true
-    },
-    options: {
-        type: [String],
-        required: true,
-        validate: {
-            validator: function(arr) {
-                return arr.length === 4;
-            },
-            message: 'Options must have exactly 4 elements.'
-        }
-    },
-    rightAnswerIndex: {
-        type: Number,
-        required: true,
-        min: 0,
-        max: 3
-    },
-    topic: {
-        type: String,
-        required: true
-    }
-});
-let Question = mongoose.model('Question', questionSchema);
+const Question = sequelize.define('Question', {
+    id_pregunta:        { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    id_categoria:       { type: DataTypes.INTEGER, allowNull: false },
+    question:           { type: DataTypes.TEXT, allowNull: false },
+    option_0:           { type: DataTypes.STRING },
+    option_1:           { type: DataTypes.STRING },
+    option_2:           { type: DataTypes.STRING },
+    option_3:           { type: DataTypes.STRING },
+    right_answer_index: { type: DataTypes.INTEGER, allowNull: false }
+}, { tableName: 'Questions', timestamps: false });
 
-//-----------EXPORTACIONES-----------//
 module.exports = Question;

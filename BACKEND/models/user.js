@@ -1,39 +1,12 @@
-//-----------IMPORTACIONES-----------//
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../database/connection');
 
-//-----------MODELO-----------//
-let userSchema = mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    email: {
-        type: String,
-        required: true
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    points: {
-        type: Number,
-        required: true
-    },
-    message: {
-        type: String,
-        required: true
-    },
-    favourite_category: {
-        type: String,
-        enum: [
-            "Star Wars", "Marvel", "Dragon Ball", "Naruto", "One Piece", "Death Note",
-            "Pokemon", "Inazuma Eleven", "LeagueOfLegends", "Zelda", "Minecraft",
-            "Mario", "Halo", "GearsOfWar", "Bob Esponja"
-        ],
-        required: true
-    }
-});
-let User = mongoose.model('User', userSchema);
+const User = sequelize.define('User', {
+    id_usuario:  { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    name:        { type: DataTypes.STRING, allowNull: false },
+    email:       { type: DataTypes.STRING, allowNull: false, unique: true },
+    password:    { type: DataTypes.STRING, allowNull: false },
+    points:      { type: DataTypes.INTEGER, defaultValue: 0 }
+}, { tableName: 'Users', timestamps: false });
 
-//-----------EXPORTACIONES-----------//
 module.exports = User;
