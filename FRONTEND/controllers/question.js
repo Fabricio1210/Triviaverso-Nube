@@ -280,5 +280,5 @@ document.getElementById('AceptarRuleta')?.addEventListener('click', () => {
 });
 // ← movido aquí para que exista cuando se necesite
 document.getElementById('btnBackHome')?.addEventListener('click', () => {
-    window.location.href = 'Home.html';
+    window.location.href = 'index.html';
 }, { once: true });

@@ -170,7 +170,7 @@ function login(){
     .then(user => {
         if(user){
             sessionStorage.setItem('user', JSON.stringify(user));
-            window.location.href = local_url + 'home.html';
+            window.location.href = local_url + 'index.html';
         }
     })
     .catch(err => console.log('Error en login: ' + err));
@@ -193,7 +193,7 @@ function register(){
     .then(user => {
         alert('Registro completado con exito!');
         sessionStorage.setItem('user', JSON.stringify(user));
-        window.location.href = local_url + 'home.html';
+        window.location.href = local_url + 'index.html';
     })
     .catch(err => console.error('Error en registro: ', err));
 }

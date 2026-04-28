@@ -22,10 +22,10 @@ routerApi.use('/categories', routerCategories);
 //-----------RUTAS PRINCIPALES-----------//
 routerApi.post('/login', login);
 routerApi.get('/', (req, res) => {
-    res.sendFile(path.resolve(__dirname + '/../../FRONTEND/views/Home.html'));
+    res.sendFile(path.resolve(__dirname + '/../../FRONTEND/views/index.html'));
 });
-routerApi.get('/home.html', (req, res) => {
-    res.sendFile(path.resolve(__dirname + '/../../FRONTEND/views/Home.html'));
+routerApi.get('/index.html', (req, res) => {
+    res.sendFile(path.resolve(__dirname + '/../../FRONTEND/views/index.html'));
 })
 routerApi.get('/EditProfile.html', (req, res) => {
     res.sendFile(path.resolve(__dirname + '/../../FRONTEND/views/EditProfile.html'));
