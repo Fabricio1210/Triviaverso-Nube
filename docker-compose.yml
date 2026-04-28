@@ -1,6 +1,6 @@
 services:
   trivia-api:
-    # Se recomienda usar la variable para que sea dinamico
+    # Descarga la imagen de tu repositorio ECR
     image: ${AWS_ACCOUNT_ID_1}.dkr.ecr.${AWS_REGION}.amazonaws.com/trivia-backend:latest
     container_name: backend-trivia
     ports:
@@ -9,13 +9,14 @@ services:
       - AWS_ACCESS_KEY_ID_1=${AWS_ACCESS_KEY_ID_1}
       - AWS_SECRET_ACCESS_KEY_1=${AWS_SECRET_ACCESS_KEY_1}
       - AWS_SESSION_TOKEN_1=${AWS_SESSION_TOKEN_1}
+      - AWS_ACCOUNT_ID_1=${AWS_ACCOUNT_ID_1}
       - SNS_TOPIC_ARN=${SNS_TOPIC_ARN}
       - AWS_REGION=${AWS_REGION}
       - MONGO_URI=${MONGO_URI}
     restart: always
 
   trivia-web:
-    # Lo mismo para el frontend
+    # Descarga la imagen del frontend de tu ECR
     image: ${AWS_ACCOUNT_ID_1}.dkr.ecr.${AWS_REGION}.amazonaws.com/trivia-frontend:latest
     container_name: frontend-trivia
     ports:

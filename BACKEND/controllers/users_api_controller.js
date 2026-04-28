@@ -3,6 +3,7 @@ const { User, UserHistory, Question, Achievement } = require('../models');
 const bcrypt = require('bcrypt');
 const { SNSClient, PublishCommand } = require('@aws-sdk/client-sns');
 
+// Cliente de SNS configurado con tus credenciales de Usuario 1
 const snsClient = new SNSClient({
     region: process.env.AWS_REGION || 'us-east-1',
     credentials: {
@@ -12,21 +13,43 @@ const snsClient = new SNSClient({
     }
 });
 
+// Funcion interna para centralizar el envio de notificaciones
+async function enviarNotificacionSNS(asunto, mensaje) {
+    if (process.env.SNS_TOPIC_ARN) {
+        try {
+            await snsClient.send(new PublishCommand({
+                Message: mensaje,
+                Subject: asunto,
+                TopicArn: process.env.SNS_TOPIC_ARN
+            }));
+        } catch (err) {
+            console.error('Error enviando a SNS:', err.message);
+        }
+    }
+}
+
 // POST /users
 async function createUser(req, res) {
     const { name, email, password } = req.body;
     if (!name || !email || !password)
-        return res.status(400).send({ Error: 'One or more parameters are missing.' });
+        return res.status(400).send({ Error: 'Faltan parametros requeridos.' });
 
     try {
         const exists = await User.findOne({ where: { email } });
         if (exists)
-            return res.status(409).send({ Error: 'Email already registered.' });
+            return res.status(409).send({ Error: 'Email ya registrado.' });
 
-    const hashed = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ name, email, password: hashed, points: 0 });
-    const { password: _, ...userSafe } = newUser.toJSON();
-    res.status(201).send(userSafe);
+        const hashed = await bcrypt.hash(password, 10);
+        const newUser = await User.create({ name, email, password: hashed, points: 0 });
+
+        // NOTIFICACION: Solo se envia al registrarse
+        await enviarNotificacionSNS(
+            'Nuevo Registro - Triviaverso',
+            `El usuario ${name} (${email}) se ha registrado exitosamente.`
+        );
+
+        const { password: _, ...userSafe } = newUser.toJSON();
+        res.status(201).send(userSafe);
     } catch (err) {
         res.status(500).send({ Error: err.message });
     }
@@ -36,19 +59,25 @@ async function createUser(req, res) {
 async function login(req, res) {
     const { email, password } = req.body;
     if (!email || !password)
-        return res.status(400).send({ Error: 'Email and password are required.' });
+        return res.status(400).send({ Error: 'Email y password son necesarios.' });
 
     try {
         const user = await User.findOne({ where: { email } });
         if (!user)
-            return res.status(404).send({ Error: 'User not found.' });
+            return res.status(404).send({ Error: 'Usuario no encontrado.' });
 
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid)
-        return res.status(401).send({ Error: 'Invalid credentials.' });
+        const valid = await bcrypt.compare(password, user.password);
+        if (!valid)
+            return res.status(401).send({ Error: 'Credenciales incorrectas.' });
 
-    const { password: _, ...userSafe } = user.toJSON();
-    res.status(200).send(userSafe);
+        // NOTIFICACION: Alerta de inicio de sesion
+        await enviarNotificacionSNS(
+            'Alerta de Inicio de Sesion',
+            `El usuario ${user.name} ha accedido a su cuenta.`
+        );
+
+        const { password: _, ...userSafe } = user.toJSON();
+        res.status(200).send(userSafe);
     } catch (err) {
         res.status(500).send({ Error: err.message });
     }
@@ -101,12 +130,11 @@ function getUserHistory(req, res) {
     .catch((err) => res.status(500).send({ Error: err.message }));
 }
 
-// POST /histories/:id
+// POST /histories/:id (SNS ELIMINADo PARA EVITAR SPAM)
 async function addUserHistory(req, res) {
     const { id_pregunta, es_correcta } = req.body;
-
     if (!id_pregunta || es_correcta === undefined)
-        return res.status(400).send({ Error: 'id_pregunta and es_correcta are required.' });
+        return res.status(400).send({ Error: 'id_pregunta y es_correcta son obligatorios.' });
 
     try {
         const newRecord = await UserHistory.create({
@@ -115,24 +143,11 @@ async function addUserHistory(req, res) {
             es_correcta
         });
 
-    if (es_correcta) {
-        await User.increment('points', { by: 10, where: { id_usuario: req.params.id } });
-    }
-
-    if (process.env.SNS_TOPIC_ARN) {
-        const estado = es_correcta ? 'correcta' : 'incorrecta';
-        try {
-        await snsClient.send(new PublishCommand({
-            Message: `El usuario con ID ${req.params.id} respondió una pregunta de forma ${estado}.`,
-            Subject: 'Actividad en Triviaverso',
-            TopicArn: process.env.SNS_TOPIC_ARN
-        }));
-        } catch (snsErr) {
-            console.error('Error enviando a SNS:', snsErr.message);
+        if (es_correcta) {
+            await User.increment('points', { by: 10, where: { id_usuario: req.params.id } });
         }
-    }
 
-    res.status(200).send(newRecord);
+        res.status(200).send(newRecord);
     } catch (err) {
         res.status(500).send({ Error: err.message });
     }
