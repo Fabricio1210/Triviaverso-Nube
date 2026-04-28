@@ -1,23 +1,20 @@
 services:
   trivia-api:
-    # Descarga la imagen de tu repositorio ECR
-    image: ${AWS_ACCOUNT_ID_1}.dkr.ecr.${AWS_REGION}.amazonaws.com/trivia-backend:latest
+    build: ./BACKEND
     container_name: backend-trivia
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - AWS_ACCESS_KEY_ID_1=${AWS_ACCESS_KEY_ID_1}
       - AWS_SECRET_ACCESS_KEY_1=${AWS_SECRET_ACCESS_KEY_1}
       - AWS_SESSION_TOKEN_1=${AWS_SESSION_TOKEN_1}
-      - AWS_ACCOUNT_ID_1=${AWS_ACCOUNT_ID_1}
       - SNS_TOPIC_ARN=${SNS_TOPIC_ARN}
       - AWS_REGION=${AWS_REGION}
       - MONGO_URI=${MONGO_URI}
     restart: always
 
   trivia-web:
-    # Descarga la imagen del frontend de tu ECR
-    image: ${AWS_ACCOUNT_ID_1}.dkr.ecr.${AWS_REGION}.amazonaws.com/trivia-frontend:latest
+    build: ./FRONTEND
     container_name: frontend-trivia
     ports:
       - "8080:80"
