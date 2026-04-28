@@ -1,4 +1,5 @@
 const { Question, Category } = require('../models');
+const { Op } = require('sequelize');
 
 // GET /questions/:id
 function getQuestionByID(req, res) {
@@ -14,15 +15,24 @@ function getQuestionByID(req, res) {
     .catch((err) => res.status(500).send({ Error: err.message }));
 }
 
-// GET /questions
-function getAllQuestions(req, res) {
-    const where = req.query.id_categoria
-        ? { id_categoria: req.query.id_categoria }
-        : {};
-
-    Question.findAll({ where, include: [{ model: Category }] })
-        .then((questions) => res.status(200).send(questions))
-        .catch((err) => res.status(500).send({ Error: err.message }));
+async function getAllQuestions(req, res) {
+    try {
+    const where = {};
+    if(req.query.nombre_categoria){
+        const cat = await Category.findOne({
+            where: { nombre: { [Op.like]: `%${req.query.nombre_categoria}%` } }
+        });
+    if(!cat) return res.status(404).send({ Error: 'Categoría no encontrada.' });
+    where.id_categoria = cat.id_categoria;
+    }
+    const preguntas = await Question.findAll({
+        where,
+        include: [{ model: Category }]
+    });
+    res.status(200).send(preguntas);
+    } catch(err) {
+        res.status(500).send({ Error: err.message });
+    }
 }
 
 // POST /questions

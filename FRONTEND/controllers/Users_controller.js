@@ -1,325 +1,268 @@
 function init(){
-    //console.log(JSON.parse(sessionStorage.getItem('user')));
     let user_account = null;
-    //Comprobamos si esta registrdo on una cuenta
-    if(sessionStorage.getItem('user') != null ) user_account = JSON.parse(sessionStorage.getItem('user'));
+    if(sessionStorage.getItem('user') != null)
+        user_account = JSON.parse(sessionStorage.getItem('user'));
     
-    //Si estas en el leaderboard
-    if(window.location.href == local_url+"leaderboard.html"){
-        if( user_account == null ){
-            //alert("Favor de iniciar sesión para ver el leaderboard");
+    // Leaderboard
+    if(window.location.pathname == "/leaderboard.html"){
+        if(user_account == null){
             window.location.href = local_url + "login.html";
-        }else{
+        } else {
             let ranking = document.getElementById("Ranking");
             if(ranking != undefined){
                 getRanking().then(rank => {
-                    for (let i = 0; i < 10 && i < rank.length ; i++) {
+                    for(let i = 0; i < 10 && i < rank.length; i++){
                         let tr = document.createElement('tr');
                         let tdpos = document.createElement('td');
                         let tdname = document.createElement('td');
                         let tdpoints = document.createElement('td');
                         tdpos.classList.add('text-center');
                         tdpoints.classList.add('text-center');
-                        tdpos.innerText = i +1;
+                        tdpos.innerText = i + 1;
                         tdname.innerText = rank[i].name;
                         tdpoints.innerText = rank[i].points;
-                        //Agregamos al usuario por posicion en el ranking
-                        tr.append(tdpos,tdname,tdpoints);
+                        tr.append(tdpos, tdname, tdpoints);
                         ranking.append(tr);
                     }
-                }).catch(err => {console.log('Error al obtener el historial del usuario: ' + err);});
+                }).catch(err => console.log('Error al obtener ranking: ' + err));
             }
-            let tbPos = document.getElementById('tbPos');
+            let tbPos  = document.getElementById('tbPos');
             let tbName = document.getElementById('tbName');
-            let tbPts = document.getElementById('tbPts');
-            getRank().then(pos => {
-                tbPos.innerText = pos;
-            });
+            let tbPts  = document.getElementById('tbPts');
+            getRank().then(pos => { tbPos.innerText = pos; });
             tbName.innerText = JSON.parse(sessionStorage.user).name;
-            tbPts.innerText = JSON.parse(sessionStorage.user).points + ' pts';
-        }
-    }
+            const id = JSON.parse(sessionStorage.user).id_usuario;
+            fetch('/users/' + id, { method: 'GET' })
+                .then(r => r.json())
+                .then(userFresco => {
+                    tbPts.innerText = userFresco.points + ' pts';
+                    const session = JSON.parse(sessionStorage.user);
+                    session.points = userFresco.points;
+                    sessionStorage.setItem('user', JSON.stringify(session));
+                })
+                .catch(err => console.error('Error trayendo puntos frescos:', err));
+                    }
+                }
 
-    //Si estas en el profile
-    if(window.location.href == local_url + "Profile.html"){
-        if( user_account == null ){
-            //alert("Favor de iniciar sesión para acceder a tu perfil");
+    // Profile
+    if(window.location.pathname == "/Profile.html"){
+        if(user_account == null){
             window.location.href = local_url + "login.html";
-        }else{
-            //obtenemos los componentes donde colocaremos la informacion
-            let username = document.getElementById('username'),
-                usermsg = document.getElementById('usermsg'),
-                useremail = document.getElementById('useremail'),
-                usercatfav = document.getElementById('usercatfav'),
-                userpts = document.getElementById('userpts'),
-                userrank = document.getElementById('userrank'),
+        } else {
+            let username     = document.getElementById('username'),
+                usermsg      = document.getElementById('usermsg'),
+                useremail    = document.getElementById('useremail'),
+                usercatfav   = document.getElementById('usercatfav'),
+                userpts      = document.getElementById('userpts'),
+                userrank     = document.getElementById('userrank'),
                 useraciertos = document.getElementById('useraciertos');
             let aciertos = 0;
 
-            //Colocamos los datos del usuario
-            username.innerText = user_account.name;
-            usermsg.innerHTML = '<b>Mensaje:</b> ' + user_account.message;
-            useremail.innerHTML = '<b>Correo:</b> ' + user_account.email;
-            usercatfav.innerHTML = '<b>Categoria favorita:</b> ' + user_account.favourite_category;
-            userpts.innerHTML = '<b>Máximo puntaje:</b> ' +user_account.points;
+            username.innerText       = user_account.name;
+            usermsg.innerHTML        = '<b>Mensaje:</b> ' + (user_account.message || '');
+            useremail.innerHTML      = '<b>Correo:</b> ' + user_account.email;
+            usercatfav.innerHTML     = '<b>Categoria favorita:</b> ' + (user_account.favourite_category || '');
+            userpts.innerHTML        = '<b>Máximo puntaje:</b> ' + user_account.points;
             getRank().then(pos => {
                 userrank.innerHTML = '<b>Ranking:</b> ' + pos;
             });
-            
-            //dependiendo la categoria favorita, cambiamos el color del banner
+
             let banner = document.getElementById('banner');
-            for (let i = 0; i < categorias.length; i++) {
-                if( categorias[i] === user_account.favourite_category ) banner.style.backgroundColor = colores[i];
+            for(let i = 0; i < categorias.length; i++){
+                if(categorias[i] === user_account.favourite_category)
+                    banner.style.backgroundColor = colores[i];
             }
 
-            //Obtenemos las preguntas que ya respondio
-            getHistorial().then(questions =>{
-                arrQuest = questions.questions;
-                //creamos el formato de cada pregunta
+            // ← Historial ahora es un array plano de registros
+            getHistorial().then(historial => {
                 let rowQuestions = document.getElementById('rowQuestions');
-                    if(arrQuest.length > 0){
-                        //Si el mensaje existe, lo quitamos por que ya estamos en una etiqueta que SI tiene tareas
-                        let prevmsg = document.getElementById('msg');
-                        if( prevmsg != undefined ) prevmsg.remove();
-                        arrQuest.forEach(question => {
-                        getQuestionByID(question.question)
-                        .then(result => {
-                            let row = document.createElement('div');
-                            row.classList.add('col-12', 'col-sm-6', 'col-lg-4');
-                            let quest = document.createElement('div');
-                            quest.classList.add('question', 'p-3');
-                            let flex = document.createElement('div');
-                            flex.classList.add('d-flex');
+                if(historial.length > 0){
+                    let prevmsg = document.getElementById('msg');
+                    if(prevmsg) prevmsg.remove();
 
-                            let preg = document.createElement('div');
-                            preg.classList.add('me-3');
-                            let b1 = document.createElement('b');
-                            b1.style.fontSize = "12px";
-                            b1.innerText = result.question;
-                            let p = document.createElement('p');
-                            p.innerText = result.options[result.rightAnswerIndex];
-                            preg.append(b1,p);
+                    historial.forEach(registro => {
+                        // registro tiene: id_pregunta, es_correcta, Question{...}
+                        const result = registro.Question; // viene del include en el backend
+                        if(!result) return;
 
-                            let i = document.createElement('i');
-                            i.classList.add('bi','fs-1');
-                            if(question.correct != true){
-                                quest.classList.add('wrong');
-                                i.classList.add('bi-x-circle');
-                            } 
-                            else{
-                                quest.classList.add('right');
-                                i.classList.add('bi-check-circle');
-                                aciertos +=1;
-                            } 
-                            flex.append(preg,i);
+                        let row   = document.createElement('div');
+                        row.classList.add('col-12', 'col-sm-6', 'col-lg-4');
+                        let quest = document.createElement('div');
+                        quest.classList.add('question', 'p-3');
+                        let flex  = document.createElement('div');
+                        flex.classList.add('d-flex');
 
-                            let gen = document.createElement('div');
-                            gen.classList.add('me-2');
-                            let b2 = document.createElement('b');
-                            b2.innerText = 'Categoria: ';
-                            let span = document.createElement('span');
-                            let cat = result.topic;
-                            for (let i = 0; i < categorias.length; i++) {
-                                if( categorias[i].toLowerCase() === cat ) cat = categorias[i];
-                            }
-                            span.innerText = cat;
-                            gen.append(b2,span);
+                        let preg = document.createElement('div');
+                        preg.classList.add('me-3');
+                        let b1 = document.createElement('b');
+                        b1.style.fontSize = "12px";
+                        b1.innerText = result.question;
+                        let p = document.createElement('p');
+                        // opciones ahora son option_0..option_3
+                        const opciones = [result.option_0, result.option_1, result.option_2, result.option_3];
+                        p.innerText = opciones[result.right_answer_index];
+                        preg.append(b1, p);
 
-                            quest.append(flex,gen);
-                            row.append(quest);
-                            //Pegamos todo el contenido de la pregunta dentro del contenedor
-                            rowQuestions.append(row);
+                        let icon = document.createElement('i');
+                        icon.classList.add('bi', 'fs-1');
+                        if(!registro.es_correcta){
+                            quest.classList.add('wrong');
+                            icon.classList.add('bi-x-circle');
+                        } else {
+                            quest.classList.add('right');
+                            icon.classList.add('bi-check-circle');
+                            aciertos += 1;
+                        }
+                        flex.append(preg, icon);
 
-                            //Por ultimo, comprobamos los acierto:
-                            useraciertos.innerHTML = '<b>Aciertos:</b> ' + aciertos;
-                        })
-                        .catch(err => console.log("Error al insertar en el historial: " + err) );
-                        });
-                    }else{
-                        let mensaje = document.createElement('p');
-                        mensaje.id = 'msg';
-                        mensaje.style.color = "yellow";
-                        mensaje.style.textAlign = 'center';
-                        mensaje.innerText = '\nJuega una partida para empezar tu historial!.';
-                        //Si el mensaje no existe todavia, lo agregamos evitando repeticiones
-                        if( document.getElementById('msg') == undefined ) rowQuestions.append(mensaje);
+                        let gen  = document.createElement('div');
+                        gen.classList.add('me-2');
+                        let b2   = document.createElement('b');
+                        b2.innerText = 'Categoria: ';
+                        let span = document.createElement('span');
+                        span.innerText = result.Category?.nombre || '';
+                        gen.append(b2, span);
 
-                        //Por ultimo, comprobamos los acierto:
-                        useraciertos.innerHTML = '<b>Aciertos:</b> 0';
-                    }
-                }).catch(err => {console.log('Error al obtener el historial del usuario: ' + err);});
+                        quest.append(flex, gen);
+                        row.append(quest);
+                        rowQuestions.append(row);
+                        useraciertos.innerHTML = '<b>Aciertos:</b> ' + aciertos;
+                    });
+                } else {
+                    let mensaje = document.createElement('p');
+                    mensaje.id = 'msg';
+                    mensaje.style.color = "yellow";
+                    mensaje.style.textAlign = 'center';
+                    mensaje.innerText = '\nJuega una partida para empezar tu historial!.';
+                    if(!document.getElementById('msg')) rowQuestions.append(mensaje);
+                    useraciertos.innerHTML = '<b>Aciertos:</b> 0';
+                }
+            }).catch(err => console.log('Error historial: ' + err));
         }
     }
 
-    //Si estas en el EditProfile
-    if(window.location.href == local_url+"EditProfile.html"){
-        if( user_account == null ){
-            //alert("Favor de iniciar sesión para acceder a editar tu perfil");
+    // EditProfile
+    if(window.location.pathname == "/EditProfile.html"){
+        if(user_account == null){
             window.location.href = local_url + "login.html";
-        }else{
-            let txtName = document.getElementById('txtName'),
-                cbcategoria = document.getElementById('cbcategoria'),
-                txtmsg = document.getElementById('txtmsg'),
-                txtpass = document.getElementById('txtpass'),
-                txtConfpass = document.getElementById('txtConfpass');
-            txtName.value = user_account.name;
-            txtmsg.value = user_account.message;
-            cbcategoria.value = user_account.favourite_category;
-            txtpass.value = user_account.password;
+        } else {
+            document.getElementById('txtName').value     = user_account.name;
+            document.getElementById('txtmsg').value      = user_account.message || '';
+            document.getElementById('cbcategoria').value = user_account.favourite_category || '';
+            // ← nunca pongas la password en el input por seguridad
         }
     }
-
 }
 
 function login(){
     event.preventDefault();
     let data = new FormData(event.target);
-
-    fetch('/login',{
+    fetch('/login', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(Object.fromEntries(data.entries()))
     })
     .then(async response => {
-        if(response.status == 404) alert("Correo y/o Contraseña incorrectos.");
+        if(response.status == 404 || response.status == 401)
+            alert("Correo y/o Contraseña incorrectos.");
         else return response.json();
     })
-    .then(user =>{
-        if(user != undefined){
-        sessionStorage.setItem('user', JSON.stringify(user));
-        window.location.href = local_url+'home.html';
+    .then(user => {
+        if(user){
+            sessionStorage.setItem('user', JSON.stringify(user));
+            window.location.href = local_url + 'home.html';
         }
-        
     })
-    .catch(err =>{
-        console.log('No se encontro al usuario.');
-    });
-
+    .catch(err => console.log('Error en login: ' + err));
 }
 let FormLogin = document.getElementById("FormLogin");
-if(FormLogin != undefined) FormLogin.addEventListener('submit', login);
+if(FormLogin) FormLogin.addEventListener('submit', login);
 
 function register(){
     event.preventDefault();
     let data = new FormData(event.target);
-    data.append('points', 0);
     fetch('/users', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(Object.fromEntries(data.entries()))
     })
-    .then(async (response) => {
-        if(!response.ok) alert(await response.text()); 
+    .then(async response => {
+        if(!response.ok) alert(await response.text());
         return response.json();
     })
     .then(user => {
         alert('Registro completado con exito!');
         sessionStorage.setItem('user', JSON.stringify(user));
-        window.location.href = local_url+'home.html';
+        window.location.href = local_url + 'home.html';
     })
-    .catch(err => {
-        console.error('Error en login: ', err);
-    });
-
+    .catch(err => console.error('Error en registro: ', err));
 }
 let FormReg = document.getElementById("FormReg");
-if(FormReg != undefined) FormReg.addEventListener('submit', register);
-
-
-async function getUser(){
-    let user = await fetch('/users/' + sessionStorage.user.id, {
-        method: 'GET'
-    }).then(async (response) => {
-        if(!response.ok) alert(await response.text());
-        return await response.json();
-    }).catch(err =>{
-        console.error("Fallo al obtener al usuario: " + err)
-    });
-    return user;
-}
+if(FormReg) FormReg.addEventListener('submit', register);
 
 async function getHistorial(){
-    let his = await fetch('/histories/' + JSON.parse(sessionStorage.user)._id, {
-        method: 'GET'
-    }).then(async (response) => {
-        if(!response.ok) alert(await response.text());
-        return await response.json();
-    }).catch(err =>{
-        console.error("Fallo al obtener el historial del usuario: " + err)
-    });
-    return his;
+    // ← id_usuario en lugar de _id
+    const id = JSON.parse(sessionStorage.user).id_usuario;
+    return fetch('/histories/' + id, { method: 'GET' })
+        .then(async response => {
+            if(!response.ok) alert(await response.text());
+            return response.json();
+        })
+        .catch(err => console.error("Fallo al obtener historial: " + err));
 }
 
 async function getRanking(){
-    let record = await fetch('/rank?top=10', {
-        method: 'GET'
-    }).then(async (response) => {
-        if(!response.ok) alert(await response.text());
-        return await response.json();
-    }).catch(err =>{
-        console.error("Fallo al obtener el top de usuarios: " + err)
-    });
-    return record;
+    return fetch('/rank', { method: 'GET' })
+        .then(async response => {
+            if(!response.ok) alert(await response.text());
+            return response.json();
+        })
+        .catch(err => console.error("Fallo al obtener ranking: " + err));
 }
 
 async function getRank(){
-    let rank = 10000;
-    return fetch('/rank?top=10000',{
-        method : 'GET'
-    }).then(async (response) => {
-        if(!response.ok) alert(await response.text());
-        return await response.json();
-    }).then(allUsers => {
-        allUsers.sort((a,b) => b.points - a.points);
-        for (let i = 0; i < allUsers.length; i++) {
-            if( allUsers[i]._id == JSON.parse(sessionStorage.user)._id){
-                rank = i + 1;
-                return rank;
+    const id = JSON.parse(sessionStorage.user).id_usuario; // ← id_usuario
+    return fetch('/rank', { method: 'GET' })
+        .then(async response => {
+            if(!response.ok) alert(await response.text());
+            return response.json();
+        })
+        .then(allUsers => {
+            allUsers.sort((a, b) => b.points - a.points);
+            for(let i = 0; i < allUsers.length; i++){
+                if(allUsers[i].id_usuario == id) return i + 1; // ← id_usuario
             }
-        }
-    }).catch(err =>{
-        console.error("Fallo al obtener TU rango: " + err)
-    });
+            return '-';
+        })
+        .catch(err => console.error("Fallo al obtener tu rango: " + err));
 }
 
 function user_update(){
-    let data_user = JSON.parse(sessionStorage.user);
+    const data_user = JSON.parse(sessionStorage.user);
     event.preventDefault();
     let data = new FormData(event.target);
-    if(data.get('password') == data.get('confirm_password') ){
+    if(data.get('password') == data.get('confirm_password')){
         data.delete('confirm_password');
-        fetch('/users/' + data_user._id, {
+        fetch('/users/' + data_user.id_usuario, { // ← id_usuario
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(Object.fromEntries(data.entries()))
         })
-        .then(async (response) => {
+        .then(async response => {
             if(!response.ok) alert(await response.text());
             return response.json();
         })
         .then(userUpdated => {
             alert('Usuario actualizado con exito!!');
             sessionStorage.setItem('user', JSON.stringify(userUpdated));
-            init();
-            //te devuelve a tu misma pestaña
-            window.location.href = local_url+'Profile.html';
+            window.location.href = local_url + 'Profile.html';
         })
-        .catch(err => {
-            console.error('Error al guardar datos: ', err);
-        });
-    }else{
-        alert('Las contraseñas no coinciden! No se realizo ningun cambio.');
+        .catch(err => console.error('Error al guardar datos: ', err));
+    } else {
+        alert('Las contraseñas no coinciden!');
     }
 }
 let FormEdit = document.getElementById("FormEdit");
-if(FormEdit != undefined) FormEdit.addEventListener('submit', user_update);
+if(FormEdit) FormEdit.addEventListener('submit', user_update);
 
-//--------------------------------------------------------------------
-//--------------------------------------------------------------------
 init();

@@ -1,30 +1,28 @@
-const categorias = [
-    "Star Wars", "Marvel", "Dragon Ball", "Naruto", "One Piece", "Death Note",
-    "Pokemon", "Inazuma Eleven", "LeagueOfLegends", "Zelda", "Minecraft",
-    "Mario", "Halo", "GearsOfWar", "Bob Esponja"
-];
+let categorias = [];
 const colores = [
-    "#FF5733", 
-    "#C70039", 
-    "#900C3F", 
-    "#581845", 
-    "#1F618D", 
-    "#154360", 
-    "#117864", 
-    "#229954", 
-    "#A04000", 
-    "#884EA0", 
-    "#2C3E50", 
-    "#E67E22", 
-    "#D35400", 
-    "#34495E", 
-    "#7D3C98"  
+    "#FF5733", "#C70039", "#900C3F", "#581845", "#1F618D",
+    "#154360", "#117864", "#229954", "#A04000", "#884EA0",
+    "#2C3E50", "#E67E22", "#D35400", "#34495E", "#7D3C98"
 ];
 
 let rotationValue = 0;
 let seleccionadas = [];
-let coloresSeleccionados = []; 
+let coloresSeleccionados = [];
 
+async function cargarCategorias() {
+    try {
+        const response = await fetch('/categories');
+        if(!response.ok) throw new Error('Error al cargar categorías');
+        const data = await response.json();
+        categorias = data.map(c => c.nombre);
+        if(window.location.pathname == '/Ruleta.html'){
+            setRouellete();
+            mostrarProgresoRonda();
+        }
+    } catch(err) {
+        console.error('Error cargando categorías:', err);
+    }
+}
 function setRouellete(){
     seleccionadas = categorias.sort(() => 0.5 - Math.random()).slice(0, 5);
     coloresSeleccionados = colores.sort(() => 0.5 - Math.random()).slice(0, 5);
@@ -37,12 +35,13 @@ function setRouellete(){
         div.style.setProperty('--i', i + 1);
         div.style.setProperty('--clr', coloresSeleccionados[i % coloresSeleccionados.length]);
         div.innerHTML = `<span>${categoria}</span>`;
-        ruleta.appendChild(div);        
+        ruleta.appendChild(div);
     });
+
     let jugadores = parseInt(localStorage.getItem('totalJugadores'), 10) || 1;
     if(jugadores != 1){
         const turno = parseInt(localStorage.getItem('turno'), 10);
-        const h1 = document.getElementById('turno')
+        const h1 = document.getElementById('turno');
         h1.textContent = `Turno del jugador: ${turno}`;
     }
 }
@@ -70,27 +69,27 @@ function transicion(){
 }
 
 function incrementarRonda() {
-    let actual = parseInt(localStorage.getItem('rondaActual'), 10) || 1;
+    let actual       = parseInt(localStorage.getItem('rondaActual'), 10) || 1;
     let rondaActualReal = parseInt(localStorage.getItem('rondaActualReal'), 10) || 1;
-    let jugadores = parseInt(localStorage.getItem('totalJugadores'), 10) || 1;
-    let turno = parseInt(localStorage.getItem('turno'), 10);
-    rondaActualReal +=1;
-    actual = Math.ceil(rondaActualReal/jugadores);
-    turno = ((rondaActualReal-1)%jugadores) + 1
+    let jugadores    = parseInt(localStorage.getItem('totalJugadores'), 10) || 1;
+    let turno        = parseInt(localStorage.getItem('turno'), 10);
+    rondaActualReal += 1;
+    actual  = Math.ceil(rondaActualReal / jugadores);
+    turno   = ((rondaActualReal - 1) % jugadores) + 1;
     localStorage.setItem('rondaActual', actual);
     localStorage.setItem('rondaActualReal', rondaActualReal);
-    localStorage.setItem('turno',turno);
+    localStorage.setItem('turno', turno);
 }
 
 function verificarFinDeJuego() {
     const total  = Number(localStorage.getItem('totalRondas'));
     const actual = Number(localStorage.getItem('rondaActual'));
 
-    if (actual > total) {
-        const scores = JSON.parse(localStorage.getItem('scores'));
+    if(actual > total){
+        const scores        = JSON.parse(localStorage.getItem('scores'));
         const totalJugadores = Number(localStorage.getItem('totalJugadores'));
         let html = '';
-        if (totalJugadores === 1) {
+        if(totalJugadores === 1){
             html = `Obtuviste ${scores[0]} puntos`;
         } else {
             html = '<h5 class="mb-3">Puntuación final</h5><ul class="list-unstyled">';
@@ -105,106 +104,89 @@ function verificarFinDeJuego() {
         );
         modalScore.show();
 
-        if (totalJugadores === 1 && JSON.parse(sessionStorage.getItem('user')) != undefined){
-            const scores = JSON.parse(localStorage.getItem('scores') || '[0]');
-            const scoreFinal = scores[0];
+        if(totalJugadores === 1 && JSON.parse(sessionStorage.getItem('user')) != undefined){
+            const scoreFinal = JSON.parse(localStorage.getItem('scores') || '[0]')[0];
             guardarRecordSiEsMayor(scoreFinal);
         }
 
-        modalScore._element.querySelector('#btnBackHome').addEventListener('click', () => window.location.href='Home.html', { once:true });
-        ['rondaActual','totalRondas','scores','score','rondaActualReal','turno'].forEach(k => localStorage.removeItem(k));
+        // ← sin listener duplicado aquí, se maneja abajo al final del archivo
+        ['rondaActual','totalRondas','scores','score','rondaActualReal','turno']
+            .forEach(k => localStorage.removeItem(k));
 
         return true;
     }
     return false;
 }
 
-function guardarRecordSiEsMayor (nuevoScore) {
+function guardarRecordSiEsMayor(nuevoScore) {
     const userJSON = sessionStorage.getItem('user');
-    if (!userJSON) {
-    console.error('Usuario no encontrado en sessionStorage');
-        return;
-    }
-    const id = JSON.parse(userJSON)._id;
-    if (!id) { console.error('ID de usuario no encontrado en sessionStorage'); return; }
-    fetch(`/users/${id}`, { method: 'GET' })
-    .then(resp => {
-        if (!resp.ok) return resp.text().then(tx => Promise.reject(tx));
-        return resp.json();
+    if(!userJSON) return;
+    const id = JSON.parse(userJSON).id_usuario;
+    if(!id) return;
+
+    fetch(`/users/${id}/points`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ points: nuevoScore })
     })
-    .then(user => {
-        const recordAnterior = user.points;
-    if (nuevoScore > recordAnterior) {
-        console.log(`Nuevo récord! ${nuevoScore} > ${recordAnterior}`);
-        let user = JSON.parse(sessionStorage.getItem('user'));
-        user.points = nuevoScore;
-        sessionStorage.setItem('user', JSON.stringify(user));
-        return fetch(`/users/${id}`, {
-            method : 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body   : JSON.stringify({ points: nuevoScore })
-        });
-        } else {
-        console.log(`Puntaje ${nuevoScore} no supera el récord ${recordAnterior}`);
-        }
+    .then(r => r.json())
+    .then(userActualizado => {
+        console.log(`Puntos en BD: ${userActualizado.points}`);
+        sessionStorage.setItem('user', JSON.stringify(userActualizado));
     })
-    .catch(err => console.error('Error GET/PATCH bestScore:', err));
+    .catch(err => console.error('Error actualizando puntos:', err));
 }
-
-
 
 function ruleta(){
     const modal = bootstrap.Modal.getInstance(document.getElementById('resultadoModal'));
     modal.hide();
-    window.location.href = `Ruleta.html`;
+    window.location.href = 'Ruleta.html';
 }
 
 function play(){
     const modal = bootstrap.Modal.getInstance(document.getElementById('categoriaModal'));
     modal.hide();
-    const param = window.categoriaSeleccionada.toLowerCase().replace(/\s+/g, '')
-    window.location.href = `pregunta.html?categoria=${param}`;
+    window.location.href = `pregunta.html?categoria=${encodeURIComponent(window.categoriaSeleccionada)}`;
 }
 
-function cargarPregunta() {
-    const params = new URLSearchParams(window.location.search);
-    let categoria = params.get("categoria"); 
-    categoria = categoria.replace(/\s+/g, "").toLowerCase();
-    //console.log(categoria = categoria.replace(/\s+/g, ""));
-    fetch(`http://localhost:3000/questions/new/${categoria}`)
-        .then(r => { if (!r.ok) throw new Error(); return r.json(); })
-        .then(data => {
-        const title = categoria
-            .replace(/([a-z])([A-Z])/g, '$1 $2')
-            .replace(/\b\w/g, l => l.toUpperCase());
-        document.querySelector('.card-title').textContent = data.topic || title;
-        document.querySelector('.card-text').textContent  = data.question;
-        data.options.forEach((op, i) => {
-            const btn = document.getElementById(`opcion${i + 1}`);
-            if (btn) {
-                btn.querySelector('span').textContent = op;
-                btn.addEventListener('click', () => validarRespuesta(i));
-            }
-            window.question_id = data._id;
-        });
-        window.respuestaCorrecta = data.rightAnswerIndex;
+async function cargarPregunta() {
+    const params    = new URLSearchParams(window.location.search);
+    const categoria = params.get("categoria"); // llega tal cual desde play()
 
-        //Guardamos la pregunta en la bd
+    fetch(`/questions?nombre_categoria=${encodeURIComponent(categoria)}`)
+        .then(r => { if(!r.ok) throw new Error(); return r.json(); })
+        .then(preguntas => {
+            if(!preguntas || preguntas.length === 0)
+                throw new Error('Sin preguntas');
 
-        // Emitimos un evento personalizado para indicar que ya se cargo la pregunta
-        document.dispatchEvent(new Event('preguntaCargada'));
+            const indice = Math.floor(Math.random() * preguntas.length);
+            const data   = preguntas[indice];
+            const opciones = [data.option_0, data.option_1, data.option_2, data.option_3];
+
+            document.querySelector('.card-title').textContent = data.Category?.nombre || categoria;
+            document.querySelector('.card-text').textContent  = data.question;
+
+            opciones.forEach((op, i) => {
+                const btn = document.getElementById(`opcion${i + 1}`);
+                if(btn){
+                    btn.querySelector('span').textContent = op;
+                    btn.addEventListener('click', () => validarRespuesta(i));
+                }
+            });
+
+            window.question_id       = data.id_pregunta;
+            window.respuestaCorrecta = data.right_answer_index;
+            document.dispatchEvent(new Event('preguntaCargada'));
         })
         .catch(() => alert("No se pudo cargar la pregunta."));
 }
 
 function validarRespuesta(indiceSeleccionado) {
-    //detenemos los timer al responder
     clearInterval(CountDownID);
     clearInterval(progressBarID);
     const correcta = window.respuestaCorrecta;
-    const puntos = (indiceSeleccionado === correcta)
-        ? Math.round((seg / 20) * 100)
-        : 0;
+    const puntos   = (indiceSeleccionado === correcta)
+        ? Math.round((seg / 20) * 100) : 0;
 
     const scores = JSON.parse(localStorage.getItem('scores'));
     const turno  = Number(localStorage.getItem('turno')) || 1;
@@ -215,59 +197,56 @@ function validarRespuesta(indiceSeleccionado) {
         ? `✅ ¡Respuesta correcta! (+${puntos} pts)`
         : "❌ Respuesta incorrecta (0 pts)";
 
-    let res = (indiceSeleccionado === correcta)
-        ? true : false;
     document.getElementById("textoResultado").textContent = texto;
-    // Guardamos la pregunta en el historial del jugador que esta participando
-    if( JSON.parse(sessionStorage.getItem('user')) != undefined) GuardarEnHistorial(res);
-    const modalElement = document.getElementById('resultadoModal');
-    const modal        = bootstrap.Modal.getOrCreateInstance(modalElement);
+
+    if(JSON.parse(sessionStorage.getItem('user')) != undefined)
+        GuardarEnHistorial(indiceSeleccionado === correcta);
+
+    const modal = bootstrap.Modal.getOrCreateInstance(
+        document.getElementById('resultadoModal')
+    );
     incrementarRonda();
     modal.show();
 }
 
 function GuardarEnHistorial(ans){
-    let data = {
-        question: window.question_id,
-        correct: ans
-    }
-    //Lo agregarmos en la historia del usuario con la sesion abierta
-    fetch('/histories/' + JSON.parse(sessionStorage.user)._id, {
+    // ← campos nuevos: id_pregunta y es_correcta
+    const data = {
+        id_pregunta: window.question_id,
+        es_correcta: ans
+    };
+
+    // ← id_usuario en lugar de _id
+    fetch('/histories/' + JSON.parse(sessionStorage.user).id_usuario, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     })
-    .then(async (response) => {
-        if(!response.ok) alert(await response.text()); 
+    .then(async response => {
+        if(!response.ok) alert(await response.text());
         return response.json();
     })
-    .catch(err => {
-        console.log("Fallo al agregar al historial: " + err);
-    });
+    .catch(err => console.log("Fallo al agregar al historial: " + err));
 
-    //Limpiamos variable global
     window.question_id = '';
-
 }
 
 function setMatch(){
     localStorage.clear();
-    const input = document.querySelector('.input-rounds');
+    const input  = document.querySelector('.input-rounds');
     const rondas = parseInt(input.value, 10);
     const jugadorSeleccionado = document.querySelector('input[name="players"]:checked');
-    if (!jugadorSeleccionado) {
+    if(!jugadorSeleccionado){
         alert("Por favor selecciona cuántas personas jugarán.");
         return;
     }
     const totalJugadores = parseInt(jugadorSeleccionado.id.replace('players', ''), 10);
     localStorage.setItem('totalJugadores', totalJugadores);
-    if (!isNaN(rondas) && rondas > 0) {
+    if(!isNaN(rondas) && rondas > 0){
         localStorage.setItem('totalRondas', rondas);
-        localStorage.setItem('rondasReales', rondas*totalJugadores);
+        localStorage.setItem('rondasReales', rondas * totalJugadores);
         localStorage.setItem('rondaActualReal', 1);
-        localStorage.setItem('turno',1)
+        localStorage.setItem('turno', 1);
         localStorage.setItem('scores', JSON.stringify(Array(totalJugadores).fill(0)));
         window.location.href = 'Ruleta.html';
     } else {
@@ -276,52 +255,30 @@ function setMatch(){
 }
 
 function mostrarProgresoRonda() {
-    const total = parseInt(localStorage.getItem('totalRondas'), 10);
+    const total  = parseInt(localStorage.getItem('totalRondas'), 10);
     const actual = parseInt(localStorage.getItem('rondaActual'), 10);
-
-    if (!isNaN(total) && !isNaN(actual)) {
+    if(!isNaN(total) && !isNaN(actual))
         document.getElementById('infoRonda').textContent = `Ronda ${actual} de ${total}`;
-    }
 }
 
-async function getQuestionByID(idQuestion){
-    let his = await fetch('/questions/byID/' + idQuestion, {
-        method: 'GET'
-    }).then(async (response) => {
-        if(!response.ok) alert(await response.text());
-        return await response.json();
-    }).catch(err =>{
-        console.error("Fallo al obtener la pregunta por ID: " + err)
-    });
-    return his;
-}
-
-function init(){
-    if (!localStorage.getItem('rondaActual')) {
+async function init(){
+    if(!localStorage.getItem('rondaActual'))
         localStorage.setItem('rondaActual', 1);
-    }
-    if(window.location.href == local_url + 'Ruleta.html'){
-        setRouellete();
-        mostrarProgresoRonda()
-    }
-    if(window.location.href.includes(local_url + 'pregunta.html')){
+    await cargarCategorias();
+    if(window.location.pathname.includes('/pregunta.html')){
         cargarPregunta();
     }
 }
-
 init();
 
 document.getElementById('spinBtn')?.addEventListener('click', spinRoullete);
 document.querySelector(".wheel")?.addEventListener("transitionend", transicion);
 document.getElementById('AceptarCategoria')?.addEventListener('click', play);
-document.getElementById('btnContinuar')?.addEventListener('click',setMatch);
+document.getElementById('btnContinuar')?.addEventListener('click', setMatch);
 document.getElementById('AceptarRuleta')?.addEventListener('click', () => {
-    if (!verificarFinDeJuego()) {  
-        ruleta();                
-    }
+    if(!verificarFinDeJuego()) ruleta();
 });
-modalScore._element.querySelector('#btnBackHome')
-        .addEventListener('click', () => {
-            window.location.href = 'Home.html';
-        }, { once: true });
-
+// ← movido aquí para que exista cuando se necesite
+document.getElementById('btnBackHome')?.addEventListener('click', () => {
+    window.location.href = 'Home.html';
+}, { once: true });

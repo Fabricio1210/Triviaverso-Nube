@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { User, UserHistory, Question, Achievement } = require('../models');
+const { User, UserHistory, Question, Achievement, Category } = require('../models');
 const bcrypt = require('bcrypt');
 const { SNSClient, PublishCommand } = require('@aws-sdk/client-sns');
 
@@ -69,15 +69,22 @@ function getUserInfo(req, res) {
 
 // PUT /users/:id
 async function editUserInfo(req, res) {
+  delete req.body.points; // proteger puntos
+
     if (req.body.password) {
         req.body.password = await bcrypt.hash(req.body.password, 10);
     }
-    User.update(req.body, { where: { id_usuario: req.params.id } })
-    .then(([rowsUpdated]) => {
-        if (rowsUpdated) res.status(200).send({ message: 'User updated.' });
-        else res.status(404).send({ Error: 'User not found.' });
-    })
-    .catch((err) => res.status(500).send({ Error: err.message }));
+
+    try {
+    await User.update(req.body, { where: { id_usuario: req.params.id } });
+    const userActualizado = await User.findByPk(req.params.id, {
+        attributes: { exclude: ['password'] }
+    });
+    if(!userActualizado) return res.status(404).send({ Error: 'User not found.' });
+    res.status(200).send(userActualizado);
+    } catch(err) {
+        res.status(500).send({ Error: err.message });
+    }
 }
 
 // DELETE /users/:id
@@ -93,9 +100,12 @@ function deleteUser(req, res) {
 // GET /histories/:id
 function getUserHistory(req, res) {
     UserHistory.findAll({
-        where: { id_usuario: req.params.id },
-        include: [{ model: Question }],
-        order: [['fecha_respuesta', 'DESC']]
+    where: { id_usuario: req.params.id },
+    include: [{
+        model: Question,
+        include: [{ model: Category }]
+    }],
+    order: [['fecha_respuesta', 'DESC']]
     })
     .then((history) => res.status(200).send(history))
     .catch((err) => res.status(500).send({ Error: err.message }));
@@ -114,11 +124,6 @@ async function addUserHistory(req, res) {
             id_pregunta,
             es_correcta
         });
-
-    if (es_correcta) {
-        await User.increment('points', { by: 10, where: { id_usuario: req.params.id } });
-    }
-
     if (process.env.SNS_TOPIC_ARN) {
         const estado = es_correcta ? 'correcta' : 'incorrecta';
         try {
@@ -149,4 +154,20 @@ function getTopUsers(req, res) {
     .catch((err) => res.status(500).send({ Error: err.message }));
 }
 
-module.exports = { createUser, login, getUserInfo, editUserInfo, deleteUser, getUserHistory, addUserHistory, getTopUsers };
+async function updatePoints(req, res) {
+    try {
+        const user = await User.findByPk(req.params.id);
+        if(!user) return res.status(404).send({ Error: 'User not found.' });
+
+        if(req.body.points > user.points) {
+            await user.update({ points: req.body.points });
+        }
+
+        const { password: _, ...userSafe } = user.toJSON();
+        res.status(200).send(userSafe);
+    } catch(err) {
+        res.status(500).send({ Error: err.message });
+    }
+}
+
+module.exports = { createUser, login, getUserInfo, editUserInfo, deleteUser, getUserHistory, addUserHistory, getTopUsers, updatePoints };

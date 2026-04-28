@@ -1,12 +1,10 @@
 const base_url = "/";
-
-const api_url = "http://localhost:3000/"; //cambiar este pedo cuando tenga la ec2
+const local_url = base_url; 
 
 function logout(){
-    event.preventDefault(); // Esto evita que el enlace recargue la página
+    event.preventDefault();
     sessionStorage.removeItem('user');
     sessionStorage.clear();
-    user_account = null;
     window.location.href = base_url + 'login.html';
 }
 let btnSalir = document.getElementById("btnSalir");
