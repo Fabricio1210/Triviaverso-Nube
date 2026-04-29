@@ -12,7 +12,7 @@ const sequelize = new Sequelize(
         dialect: 'mariadb',
         port: process.env.DB_PORT || 3306,
         logging: false,
-        dialect: 'mariadb',
+        dialect: 'mysql',
         port: process.env.DB_PORT || 3306,
         logging: false,
         dialectOptions: {

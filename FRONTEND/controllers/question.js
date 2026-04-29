@@ -15,7 +15,7 @@ async function cargarCategorias() {
         if(!response.ok) throw new Error('Error al cargar categorías');
         const data = await response.json();
         categorias = data.map(c => c.nombre);
-        if(window.location.pathname == '/Ruleta.html'){
+        if(window.location.pathname == '/views/Ruleta.html'){
             setRouellete();
             mostrarProgresoRonda();
         }
@@ -140,13 +140,13 @@ function guardarRecordSiEsMayor(nuevoScore) {
 function ruleta(){
     const modal = bootstrap.Modal.getInstance(document.getElementById('resultadoModal'));
     modal.hide();
-    window.location.href = 'Ruleta.html';
+    window.location.href = '/views/Ruleta.html';
 }
 
 function play(){
     const modal = bootstrap.Modal.getInstance(document.getElementById('categoriaModal'));
     modal.hide();
-    window.location.href = `pregunta.html?categoria=${encodeURIComponent(window.categoriaSeleccionada)}`;
+    window.location.href = `/views/Pregunta.html?categoria=${encodeURIComponent(window.categoriaSeleccionada)}`;
 }
 
 async function cargarPregunta() {
@@ -248,7 +248,7 @@ function setMatch(){
         localStorage.setItem('rondaActualReal', 1);
         localStorage.setItem('turno', 1);
         localStorage.setItem('scores', JSON.stringify(Array(totalJugadores).fill(0)));
-        window.location.href = 'Ruleta.html';
+        window.location.href = '/views/Ruleta.html';
     } else {
         alert('Por favor ingresa un número válido de rondas.');
     }
@@ -265,7 +265,7 @@ async function init(){
     if(!localStorage.getItem('rondaActual'))
         localStorage.setItem('rondaActual', 1);
     await cargarCategorias();
-    if(window.location.pathname.includes('/pregunta.html')){
+    if(window.location.pathname.includes('/views/Pregunta.html')){
         cargarPregunta();
     }
 }
@@ -280,5 +280,5 @@ document.getElementById('AceptarRuleta')?.addEventListener('click', () => {
 });
 // ← movido aquí para que exista cuando se necesite
 document.getElementById('btnBackHome')?.addEventListener('click', () => {
-    window.location.href = 'Home.html';
+    window.location.href = '/views/Home.html';
 }, { once: true });

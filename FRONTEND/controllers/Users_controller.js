@@ -4,9 +4,9 @@ function init(){
         user_account = JSON.parse(sessionStorage.getItem('user'));
     
     // Leaderboard
-    if(window.location.pathname == "/leaderboard.html"){
+    if(window.location.pathname == "/views/leaderboard.html"){
         if(user_account == null){
-            window.location.href = local_url + "login.html";
+            window.location.href = '/views/Login.html';
         } else {
             let ranking = document.getElementById("Ranking");
             if(ranking != undefined){
@@ -45,9 +45,9 @@ function init(){
                 }
 
     // Profile
-    if(window.location.pathname == "/Profile.html"){
+    if(window.location.pathname == "/views/Profile.html"){
         if(user_account == null){
-            window.location.href = local_url + "login.html";
+            window.location.href = '/views/Login.html';
         } else {
             let username     = document.getElementById('username'),
                 usermsg      = document.getElementById('usermsg'),
@@ -142,9 +142,9 @@ function init(){
     }
 
     // EditProfile
-    if(window.location.pathname == "/EditProfile.html"){
+    if(window.location.pathname == "/views/EditProfile.html"){
         if(user_account == null){
-            window.location.href = local_url + "login.html";
+            window.location.href = '/views/Login.html';
         } else {
             document.getElementById('txtName').value     = user_account.name;
             document.getElementById('txtmsg').value      = user_account.message || '';
@@ -170,7 +170,7 @@ function login(){
     .then(user => {
         if(user){
             sessionStorage.setItem('user', JSON.stringify(user));
-            window.location.href = local_url + 'home.html';
+            window.location.href = '/views/Home.html';
         }
     })
     .catch(err => console.log('Error en login: ' + err));
@@ -193,7 +193,7 @@ function register(){
     .then(user => {
         alert('Registro completado con exito!');
         sessionStorage.setItem('user', JSON.stringify(user));
-        window.location.href = local_url + 'home.html';
+        window.location.href = '/views/Home.html';
     })
     .catch(err => console.error('Error en registro: ', err));
 }
@@ -255,7 +255,7 @@ function user_update(){
         .then(userUpdated => {
             alert('Usuario actualizado con exito!!');
             sessionStorage.setItem('user', JSON.stringify(userUpdated));
-            window.location.href = local_url + 'Profile.html';
+            window.location.href = '/views/Profile.html';
         })
         .catch(err => console.error('Error al guardar datos: ', err));
     } else {
