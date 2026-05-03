@@ -1,5 +1,6 @@
 body, html {
     background: #29272B;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
 }
 
 *{
@@ -17,6 +18,24 @@ body, html {
     margin-left: 30%;
 }
 
+.wheel-round-info{
+    position: absolute;
+    top: -48px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(280px, 90vw);
+    margin: 0;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: normal;
+    text-transform: none;
+    color: #f8f9fa;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+    z-index: 11;
+    pointer-events: none;
+}
+
 .container .spinBtn{
     position: absolute;
     width: 60px;
@@ -27,11 +46,10 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: center;
-    text-transform: uppercase;
     font-weight: 600;
     color: #333;
-    letter-spacing: 0.1em;
     border: 4px solid rgba(0,0,0,0.75);
+    cursor: pointer;
 }
 
 .container .spinBtn::before{
@@ -80,13 +98,8 @@ body, html {
     font-size: 15px;
     font-weight: 700;
     color: #fff;
-    text-shadow: px 3px 2px rgba(0,0,0,0.15);
-}
-
-.container .wheel .category span::after{
-    position: absolute;
-    font-size: 0.75em;
-    font-weight: 500;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+    text-shadow: 1px 2px 2px rgba(0,0,0,0.35);
 }
 
 .center{

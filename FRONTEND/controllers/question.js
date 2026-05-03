@@ -194,8 +194,8 @@ function validarRespuesta(indiceSeleccionado) {
     localStorage.setItem('scores', JSON.stringify(scores));
 
     const texto = (indiceSeleccionado === correcta)
-        ? `✅ ¡Respuesta correcta! (+${puntos} pts)`
-        : "❌ Respuesta incorrecta (0 pts)";
+        ? `¡Respuesta correcta! (+${puntos} pts)`
+        : "Respuesta incorrecta (0 pts)";
 
     document.getElementById("textoResultado").textContent = texto;
 
