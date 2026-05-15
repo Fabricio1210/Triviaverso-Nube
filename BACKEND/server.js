@@ -19,7 +19,7 @@ app.use(routerApi);
 sequelize.authenticate()
     .then(() => {
         console.log('Conectando a base de datos...');
-        return sequelize.sync({ alter: true });
+        return sequelize.sync();
     })
     .then(() => {
         console.log('Conexion exitosa a RDS!');
@@ -31,4 +31,3 @@ sequelize.authenticate()
         console.error('Error al conectar a la base de datos:', err.message);
         process.exit(1);
     });
-    
