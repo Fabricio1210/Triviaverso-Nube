@@ -31,3 +31,4 @@ sequelize.authenticate()
         console.error('Error al conectar a la base de datos:', err.message);
         process.exit(1);
     });
+    
