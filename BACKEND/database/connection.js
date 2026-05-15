@@ -3,8 +3,6 @@ const { Sequelize } = require('sequelize');
 const fs = require('fs');
 const path = require('path');
 
-const certPath = path.join(__dirname, '../certs/global-bundle.pem');
-
 const sequelize = new Sequelize(
     process.env.DB_NAME,
     process.env.DB_USER,
@@ -15,15 +13,14 @@ const sequelize = new Sequelize(
         port: process.env.DB_PORT || 3306,
         logging: false,
         dialectOptions: {
-            ssl: {
-                ca: fs.readFileSync(certPath),
-                rejectUnauthorized: true
+        ssl: {
+            ca: fs.readFileSync(path.join(__dirname, '../certs/global-bundle.pem')),
+            rejectUnauthorized: false
             }
         },
         pool: { max: 5, min: 0, acquire: 30000, idle: 10000 }
     }
 );
 
-module.exports = sequelize;
 module.exports = sequelize;
 
