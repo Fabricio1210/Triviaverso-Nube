@@ -9,7 +9,8 @@ const Question = sequelize.define('Question', {
     option_1:           { type: DataTypes.STRING },
     option_2:           { type: DataTypes.STRING },
     option_3:           { type: DataTypes.STRING },
-    right_answer_index: { type: DataTypes.INTEGER, allowNull: false }
+    right_answer_index: { type: DataTypes.INTEGER, allowNull: false },
+    image_url:          { type: DataTypes.STRING(500), allowNull: true }
 }, { tableName: 'Questions', timestamps: false });
 
 module.exports = Question;

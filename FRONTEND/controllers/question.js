@@ -165,6 +165,15 @@ async function cargarPregunta() {
 
             document.querySelector('.card-title').textContent = data.Category?.nombre || categoria;
             document.querySelector('.card-text').textContent  = data.question;
+            const imgEl = document.getElementById('question-image');
+            if(imgEl){
+                if(data['image-url']){
+                    imgEl.src = data['image-url'];
+                    imgEl.style.display = 'block';
+                } else {
+                    imgEl.style.display = 'none';
+                }
+            }
 
             opciones.forEach((op, i) => {
                 const btn = document.getElementById(`opcion${i + 1}`);
