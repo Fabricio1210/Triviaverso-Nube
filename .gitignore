@@ -1,6 +1,7 @@
 .idea
 BACKEND/node_modules
 BACKEND/.env
+BACKEND/certs/
 FRONTEND/pruebas.HTTP
 FRONTEND/views/Timer
 FRONTEND/views/Timer/Timer.css

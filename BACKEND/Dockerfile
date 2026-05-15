@@ -3,5 +3,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+COPY certs/ /app/certs/
 EXPOSE 3000
 CMD ["npm", "start"]
