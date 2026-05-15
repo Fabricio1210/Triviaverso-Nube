@@ -2,6 +2,11 @@
 const express = require('express');
 const path = require('path');
 const routerApi = express.Router();
+
+routerApi.use((req, res, next) => {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    next();
+});
 const {routerUsers} = require('./Users.js');
 const {routerQuestions} = require('./Questions.js');
 const {routerRanks} = require('./Ranks.js');

@@ -61,7 +61,7 @@ function init(){
             username.innerText       = user_account.name;
             usermsg.innerHTML        = '<b>Mensaje:</b> ' + (user_account.message || '');
             useremail.innerHTML      = '<b>Correo:</b> ' + user_account.email;
-            usercatfav.innerHTML     = '<b>Categoria favorita:</b> ' + (user_account.favourite_category || '');
+            usercatfav.innerHTML     = '<b>Categoría favorita:</b> ' + (user_account.favourite_category || '');
             userpts.innerHTML        = '<b>Máximo puntaje:</b> ' + user_account.points;
             getRank().then(pos => {
                 userrank.innerHTML = '<b>Ranking:</b> ' + pos;
@@ -118,7 +118,7 @@ function init(){
                         let gen  = document.createElement('div');
                         gen.classList.add('me-2');
                         let b2   = document.createElement('b');
-                        b2.innerText = 'Categoria: ';
+                        b2.innerText = 'Categoría: ';
                         let span = document.createElement('span');
                         span.innerText = result.Category?.nombre || '';
                         gen.append(b2, span);
@@ -133,7 +133,7 @@ function init(){
                     mensaje.id = 'msg';
                     mensaje.style.color = "yellow";
                     mensaje.style.textAlign = 'center';
-                    mensaje.innerText = '\nJuega una partida para empezar tu historial!.';
+                    mensaje.innerText = '¡Juega una partida para empezar tu historial!';
                     if(!document.getElementById('msg')) rowQuestions.append(mensaje);
                     useraciertos.innerHTML = '<b>Aciertos:</b> 0';
                 }
@@ -191,7 +191,7 @@ function register(){
         return response.json();
     })
     .then(user => {
-        alert('Registro completado con exito!');
+        alert('Registro completado con éxito.');
         sessionStorage.setItem('user', JSON.stringify(user));
         window.location.href = '/views/Home.html';
     })
@@ -253,7 +253,7 @@ function user_update(){
             return response.json();
         })
         .then(userUpdated => {
-            alert('Usuario actualizado con exito!!');
+            alert('Usuario actualizado con éxito.');
             sessionStorage.setItem('user', JSON.stringify(userUpdated));
             window.location.href = '/views/Profile.html';
         })
