@@ -44,7 +44,6 @@ function init(){
                     }
                 }
 
-    // Profile
     if(window.location.pathname == "/views/Profile.html"){
         if(user_account == null){
             window.location.href = '/views/Login.html';
