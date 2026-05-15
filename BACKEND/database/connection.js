@@ -1,7 +1,5 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
-const fs = require('fs');
-const path = require('path');
 
 const sequelize = new Sequelize(
     process.env.DB_NAME,
@@ -13,9 +11,8 @@ const sequelize = new Sequelize(
         port: process.env.DB_PORT || 3306,
         logging: false,
         dialectOptions: {
-        ssl: {
-            ca: fs.readFileSync(path.join(__dirname, '../certs/global-bundle.pem')),
-            rejectUnauthorized: false
+            ssl: {
+                rejectUnauthorized: false
             }
         },
         pool: { max: 5, min: 0, acquire: 30000, idle: 10000 }
