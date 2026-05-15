@@ -3,28 +3,42 @@ const { User, UserHistory, Question, Achievement, Category } = require('../model
 const bcrypt = require('bcrypt');
 const { SNSClient, PublishCommand } = require('@aws-sdk/client-sns');
 
-// Cliente de SNS configurado con tus credenciales de Usuario 1
-const snsClient = new SNSClient({
-    region: process.env.AWS_REGION || 'us-east-1',
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID_1,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY_1,
-        sessionToken: process.env.AWS_SESSION_TOKEN_1
-    }
-});
+// ARN del tópico SNS (configurar en .env como SNS_TOPIC_ARN; no versionar .env en git).
+let snsClient = null;
+function getSnsClient() {
+    if (snsClient) return snsClient;
+    const accessKeyId = process.env.AWS_ACCESS_KEY_ID_1;
+    const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY_1;
+    if (!accessKeyId || !secretAccessKey) return null;
+    const credentials = {
+        accessKeyId,
+        secretAccessKey,
+        ...(process.env.AWS_SESSION_TOKEN_1 && { sessionToken: process.env.AWS_SESSION_TOKEN_1 })
+    };
+    snsClient = new SNSClient({
+        region: process.env.AWS_REGION || 'us-east-1',
+        credentials
+    });
+    return snsClient;
+}
 
-// Funcion interna para centralizar el envio de notificaciones
+/** Publica al tópico SNS: los correos suscritos al tópico reciben el mensaje. */
 async function enviarNotificacionSNS(asunto, mensaje) {
-    if (process.env.SNS_TOPIC_ARN) {
-        try {
-            await snsClient.send(new PublishCommand({
-                Message: mensaje,
-                Subject: asunto,
-                TopicArn: process.env.SNS_TOPIC_ARN
-            }));
-        } catch (err) {
-            console.error('Error enviando a SNS:', err.message);
-        }
+    const topicArn = process.env.SNS_TOPIC_ARN;
+    if (!topicArn) return;
+    const client = getSnsClient();
+    if (!client) {
+        console.warn('SNS_TOPIC_ARN está definido pero faltan credenciales AWS en .env');
+        return;
+    }
+    try {
+        await client.send(new PublishCommand({
+            Message: mensaje,
+            Subject: asunto,
+            TopicArn: topicArn
+        }));
+    } catch (err) {
+        console.error('Error enviando a SNS:', err.message);
     }
 }
 
@@ -69,12 +83,6 @@ async function login(req, res) {
         const valid = await bcrypt.compare(password, user.password);
         if (!valid)
             return res.status(401).send({ Error: 'Credenciales incorrectas.' });
-
-        // NOTIFICACION: Alerta de inicio de sesion
-        await enviarNotificacionSNS(
-            'Alerta de Inicio de Sesion',
-            `El usuario ${user.name} ha accedido a su cuenta.`
-        );
 
         const { password: _, ...userSafe } = user.toJSON();
         res.status(200).send(userSafe);
