@@ -19,8 +19,6 @@ function IncreaseBar(){
     let bar = document.getElementById('progress');
     if (progressPercent >= 100) {
         bar.style.width = "100%";
-        //alert("Barra completada en el seg: " + seg);
-        //clearInterval(progressBarID);
         return;
     }
     progressPercent += stepPercent;
