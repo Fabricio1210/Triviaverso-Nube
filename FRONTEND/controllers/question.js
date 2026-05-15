@@ -161,6 +161,7 @@ async function cargarPregunta() {
 
             const indice = Math.floor(Math.random() * preguntas.length);
             const data   = preguntas[indice];
+            console.log('Campos de la pregunta:', JSON.stringify(data));
             const opciones = [data.option_0, data.option_1, data.option_2, data.option_3];
 
             document.querySelector('.card-title').textContent = data.Category?.nombre || categoria;
